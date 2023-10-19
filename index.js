@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -23,7 +23,6 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
     const productCollection = client.db("productDB").collection("product");
@@ -43,9 +42,40 @@ async function run() {
     app.get("/product/:brand", async (req, res) => {
       const brand = req.params.brand;
       const query = {
-        brand : brand,
+        brand: brand,
       };
       const result = await productCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.get("/productDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: new ObjectId(id),
+      };
+      const result = await productCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.put("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = {
+        _id: new ObjectId(id),
+      };
+      const data = req.body;
+      const options = { upsert: true };
+      const updateProduct = {
+        $set: {
+          name: data.name,
+          brand: data.brand,
+          price: data.price,
+          rating: data.rating,
+          type: data.type,
+          image: data.image,
+          shortDescription: data.shortDescription,
+        },
+      };
+      const result = await productCollection.updateOne( filter, updateProduct, options );
       res.send(result);
     });
 
