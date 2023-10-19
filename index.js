@@ -26,6 +26,7 @@ async function run() {
     await client.connect();
 
     const productCollection = client.db("productDB").collection("product");
+    const cartCollection = client.db("productDB").collection("cartData");
 
     app.post("/product", async (req, res) => {
       const product = req.body;
@@ -33,9 +34,18 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/product", async (req, res) => {
-      const cursor = productCollection.find();
-      const result = await cursor.toArray();
+    app.post("/cartData", async (req, res) => {
+      const cart = req.body;
+      const result = await cartCollection.insertOne(cart);
+      res.send(result);
+    });
+
+    app.get("/cartData/:user", async (req, res) => {
+      const user = req.params.user;
+      const query = {
+        userName: user,
+      };
+      const result = await cartCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -75,7 +85,11 @@ async function run() {
           shortDescription: data.shortDescription,
         },
       };
-      const result = await productCollection.updateOne( filter, updateProduct, options );
+      const result = await productCollection.updateOne(
+        filter,
+        updateProduct,
+        options
+      );
       res.send(result);
     });
 
