@@ -49,6 +49,19 @@ async function run() {
       res.send(result);
     });
 
+
+app.delete("/cartData/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("delete", id);
+      const query = {
+        _id: new ObjectId(id),
+      };
+      const result = await cartCollection.deleteOne(query);
+      console.log(result);
+      res.send(result);
+    });
+
+
     app.get("/product/:brand", async (req, res) => {
       const brand = req.params.brand;
       const query = {
